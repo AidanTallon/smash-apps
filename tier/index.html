@@ -15,10 +15,11 @@
 			<button id="hidebuttons">Hide controls</button>
 			<button id="game">Change game</button>
 			<button id="help">Help</button>
-		</div>
+			<button id="reset">Reset</button> <!-- reset tier list with resetTierList()
+ -->		</div>
 	</div>
 	
-	<div id="tablewrap"><table><tbody>
+	<div id="tablewrap"><table><tbody id="tierlistbody">
 		<tr>
 			<td class="labelHolder" contenteditable="true"><span class="label">S</span></td>
 			<td><div class="tier sort" id="rows"></div></td>
@@ -199,6 +200,11 @@
 				case "switchSmash4": changeGame(gameSmash4);break;
 			}
 		});
+		
+		$(document).on("click", "#reset", function() { // reset tier list
+			console.log("Tier list reset");
+			resetTierList();
+		})
 			
 		$(document).on("click", function(e) {
 			clicked = e.target.id;
@@ -383,6 +389,47 @@
 		
 		function alignPopup(popup) {
 			return Math.floor(($(window).height() - popup.height())/2)+"px";
+		}
+		
+		function resetTierList() { // removes all characters from tierlist and resets tier names
+
+			$(".character").each( function() {
+				$(this).remove();
+			});
+			for (var i = 1; i < currentGameChars.length; i++) {
+				$("#char div:last-child").after(singleChar);
+				$("#char div:last-child").css("background-image","url(img/"+currentGame+"/"+currentGameChars[i]+".png)");
+				$("#char div:last-child").attr("id",i);
+			}; // replace all characters
+
+			$("tr").each( function() {
+				$(this).remove();
+			}); // remove all tiers
+			
+			var tierName = ["S", "A", "B", "C", "D", "E", "F"];
+			
+			var tierListBody = document.getElementById("tierlistbody");
+			for (var i = 0; i < 7; i++) {
+				var newTier = document.createElement("tr");
+				newTier.innerHTML = 	'<td class="labelHolder" contenteditable="true"><span class="label">' + tierName[i] + 
+							'</span></td><td><div class="tier sort" id="rows"></div></td><td><div id="settings">' + 
+							'</div><div id="moveButtons"><div id="moveUp"></div><div id="moveDown"></div></div></td>'
+				tierListBody.appendChild(newTier);
+			}; // create new tiers
+			
+			tierDefaults = [ [$("tr:nth-of-type(1)"), 0],
+					  [$("tr:nth-of-type(2)"), 1],
+					  [$("tr:nth-of-type(3)"), 3],
+					  [$("tr:nth-of-type(4)"), 5],
+					  [$("tr:nth-of-type(5)"), 7],
+					  [$("tr:nth-of-type(6)"), 8],
+					  [$("tr:nth-of-type(7)"), 9] ]; // update tierDefaults
+			
+			for (var i = 0; i < tierDefaults.length; i++) {
+				tierDefaults[i][0].find(".labelHolder").css("background",colors[tierDefaults[i][1]]);
+			}; // set color
+			
+			updateTiers();
 		}
 		
 		$(document).ready( function() {
